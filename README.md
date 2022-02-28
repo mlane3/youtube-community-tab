@@ -2,6 +2,8 @@
 
 Python3 interface to YouTube community tab, it handles posts, comments and comment replies.
 
+This is a fork from [bot-jonas/youtube-community-tab](https://github.com/bot-jonas/youtube-community-tab) which aims to return more comprehensive objects with JSON and support cookies for posts limited to memberships.
+
 ## Community Tab
 
 ```python
