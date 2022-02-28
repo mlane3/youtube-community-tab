@@ -64,7 +64,7 @@ class Post(object):
             headers["Authorization"] = get_auth_header(current_cookies["SAPISID"])
 
         post_url = Post.FORMAT_URLS["POST"].format(post_id)
-        r = requests_cache.get(post_url, expire_after=expire_after)
+        r = requests_cache.get(post_url, expire_after=expire_after, headers=headers)
 
         m = re.findall(Post.REGEX["YT_INITIAL_DATA"], r.text)
         data = json.loads(m[0])
