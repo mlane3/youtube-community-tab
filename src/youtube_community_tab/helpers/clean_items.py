@@ -1,9 +1,11 @@
 from urllib.parse import parse_qs, unquote, urlparse
-import json
+from .utils import safely_get_value_from_key as safe
+from .utils import safely_pop_value_from_key as safe_pop
+
 
 # lots of returned objects are full of tracking params, client data, duplicate info, etc. this sorta trims the fat.
 def clean_content_text(content):
-    for item in content["runs"]:
+    for item in safe(content, "runs", default=[]):
         if "navigationEndpoint" in item:
             # traditional links
             if "urlEndpoint" in item["navigationEndpoint"]:
@@ -17,7 +19,7 @@ def clean_content_text(content):
             # hashtags
             elif "browseEndpoint" in item["navigationEndpoint"]:
                 item.pop("loggingDirectives")
-                item["navigationEndpoint"]["browseEndpoint"].pop("params")
+                safe_pop(item, "navigationEndpoint", "browseEndpoint", "params")
                 item["browseEndpoint"] = item["navigationEndpoint"]["browseEndpoint"]
                 item["browseEndpoint"]["url"] = item["navigationEndpoint"]["commandMetadata"]["webCommandMetadata"]["url"]
                 item.pop("navigationEndpoint")
@@ -27,25 +29,42 @@ def clean_backstage_attachement(attachment):
     if attachment:
         if "pollRenderer" in attachment:
             for choice in attachment["pollRenderer"]["choices"]:
-                for value in ["selectServiceEndpoint", "deselectServiceEndpoint",
-                    "voteRatioIfSelected", "votePercentageIfSelected",
-                    "voteRatioIfNotSelected", "votePercentageIfNotSelected"]:
-                    choice.pop(value)
+                for value in [
+                    "selectServiceEndpoint",
+                    "deselectServiceEndpoint",
+                    "voteRatioIfSelected",
+                    "votePercentageIfSelected",
+                    "voteRatioIfNotSelected",
+                    "votePercentageIfNotSelected",
+                ]:
+                    safe_pop(choice, value)
         elif "videoRenderer" in attachment:
-            attachment["videoRenderer"]["navigationEndpoint"]["watchEndpoint"].pop("watchEndpointSupportedOnesieConfig")
-            attachment["videoRenderer"]["watchEndpoint"] = attachment["videoRenderer"]["navigationEndpoint"]["watchEndpoint"]
-            attachment["videoRenderer"]["watchEndpoint"]["url"] = attachment["videoRenderer"]["navigationEndpoint"]["commandMetadata"]["webCommandMetadata"]["url"]
-            for long_by_line in attachment["videoRenderer"]["longBylineText"]["runs"]:
+            safe_pop(attachment, "videoRenderer", "navigationEndpoint", "watchEndpoint", "watchEndpointSupportedOnesieConfig")
+            attachment["videoRenderer"]["watchEndpoint"] = safe(attachment, "videoRenderer", "navigationEndpoint", "watchEndpoint", default={})
+            attachment["videoRenderer"]["watchEndpoint"]["url"] = safe(
+                attachment, "videoRenderer", "navigationEndpoint", "commandMetadata", "webCommandMetadata", "url"
+            )
+
+            for long_by_line in safe(attachment, "videoRenderer", "longBylineText", "runs", default=[]):
                 long_by_line["browseEndpoint"] = long_by_line["navigationEndpoint"]["browseEndpoint"]
                 long_by_line.pop("navigationEndpoint")
-            for short_by_line in attachment["videoRenderer"]["shortBylineText"]["runs"]:
+
+            for short_by_line in safe(attachment, "videoRenderer", "shortBylineText", "runs", default=[]):
                 short_by_line["browseEndpoint"] = short_by_line["navigationEndpoint"]["browseEndpoint"]
                 short_by_line.pop("navigationEndpoint")
-            for author in attachment["videoRenderer"]["ownerText"]["runs"]:
+
+            for author in safe(attachment, "videoRenderer", "ownerText", "runs", default=[]):
                 author["browseEndpoint"] = author["navigationEndpoint"]["browseEndpoint"]
-            for value in ["publishedTimeText", "navigationEndpoint", "trackingParams", "showActionMenu", "menu",
-                "channelThumbnailSupportedRenderers", "thumbnailOverlays"]:
-                attachment["videoRenderer"].pop(value)
+
+            for value in [
+                "publishedTimeText",
+                "navigationEndpoint",
+                "trackingParams",
+                "showActionMenu",
+                "menu",
+                "channelThumbnailSupportedRenderers",
+                "thumbnailOverlays",
+            ]:
+                safe_pop(attachment, "videoRenderer", value)
         return attachment
     return None
-

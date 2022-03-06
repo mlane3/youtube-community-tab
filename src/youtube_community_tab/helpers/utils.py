@@ -17,6 +17,22 @@ def safely_get_value_from_key(*args, default=None):
     return obj
 
 
+def safely_pop_value_from_key(*args):
+    obj = args[0]
+    keys = args[1:-1]
+
+    for key in keys:
+        try:
+            obj = obj[key]
+        except Exception:
+            return None
+
+    pop_key = args[-1]
+
+    if(pop_key in obj):
+        obj.pop(pop_key)
+
+
 def save_object_to_file(obj, path):
     with open(path, "w") as f:
         f.write(json.dumps(obj, indent=4))

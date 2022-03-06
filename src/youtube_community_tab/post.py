@@ -19,15 +19,7 @@ class Post(object):
         "YT_INITIAL_DATA": "ytInitialData = ({(?:(?:.|\n)*)?});</script>",
     }
 
-    def __init__(
-        self,
-        post_id,
-        author = None,
-        content_text = None,
-        backstage_attachment = None,
-        vote_count = None,
-        sponsor_only_badge = None
-    ):
+    def __init__(self, post_id, author=None, content_text=None, backstage_attachment=None, vote_count=None, sponsor_only_badge=None):
         self.post_id = post_id
         self.author = author
         self.content_text = content_text
@@ -49,14 +41,12 @@ class Post(object):
             "content_text": self.content_text,
             "backstage_attachment": self.backstage_attachment,
             "vote_count": self.vote_count,
-            "sponsor_only_badge": self.sponsor_only_badge
+            "sponsor_only_badge": self.sponsor_only_badge,
         }
 
     @staticmethod
     def from_post_id(post_id, expire_after=0):
-        headers = {
-            "Referer": Post.FORMAT_URLS["POST"].format(post_id)
-        }
+        headers = {"Referer": Post.FORMAT_URLS["POST"].format(post_id)}
 
         # Add authorization header
         current_cookies = dict_from_cookiejar(requests_cache.cookies)
@@ -78,7 +68,9 @@ class Post(object):
         post.get_first_continuation_token(data)
         post.get_click_tracking_params(data)
         post.visitor_data = data["responseContext"]["webResponseContextExtensionData"]["ytConfigData"]["visitorData"]
-        post.session_index = str(data["responseContext"]["webResponseContextExtensionData"]["ytConfigData"]["sessionIndex"])
+        post.session_index = str(
+            safely_get_value_from_key(data, "responseContext", "webResponseContextExtensionData", "ytConfigData", "sessionIndex", default="")
+        )
 
         return post
 
@@ -118,10 +110,13 @@ class Post(object):
         self.click_tracking_params = data["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][0]["tabRenderer"]["content"]["sectionListRenderer"][
             "contents"][1]["itemSectionRenderer"]["contents"][0]["continuationItemRenderer"]["continuationEndpoint"]["clickTrackingParams"]
 
+    def get_click_tracking_params(self, data):
+        self.click_tracking_params = data["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][0]["tabRenderer"]["content"]["sectionListRenderer"]["contents"][
+            1
+        ]["itemSectionRenderer"]["contents"][0]["continuationItemRenderer"]["continuationEndpoint"]["clickTrackingParams"]
+
     def load_comments(self, expire_after=0):
-        headers = {
-            "Referer": Post.FORMAT_URLS["POST"].format(self.post_id)
-        }
+        headers = {"Referer": Post.FORMAT_URLS["POST"].format(self.post_id)}
 
         # Add authorization header
         current_cookies = dict_from_cookiejar(requests_cache.cookies)
@@ -130,11 +125,7 @@ class Post(object):
 
         if self.comments_continuation_token is None:
             try:
-                r = requests_cache.get(
-                    Post.FORMAT_URLS["POST"].format(self.post_id),
-                    expire_after=expire_after,
-                    headers=headers
-                )
+                r = requests_cache.get(Post.FORMAT_URLS["POST"].format(self.post_id), expire_after=expire_after, headers=headers)
 
                 m = re.findall(Post.REGEX["YT_INITIAL_DATA"], r.text)
                 data = json.loads(m[0])
@@ -148,12 +139,14 @@ class Post(object):
                 print("[Some non-expected exception, probably caused by requests...]")
                 raise e
         elif self.comments_continuation_token is not False:
-            headers.update({
-                "X-Goog-AuthUser": self.session_index,
-                "X-Origin": "https://www.youtube.com",
-                "X-Youtube-Client-Name": "1",
-                "X-Youtube-Client-Version": Post.CLIENT_VERSION
-            })
+            headers.update(
+                {
+                    "X-Goog-AuthUser": self.session_index,
+                    "X-Origin": "https://www.youtube.com",
+                    "X-Youtube-Client-Name": "1",
+                    "X-Youtube-Client-Version": CLIENT_VERSION,
+                }
+            )
 
             json_body = {
                 "context": {
@@ -161,21 +154,14 @@ class Post(object):
                         "clientName": "WEB",
                         "clientVersion": CLIENT_VERSION,
                         "originalUrl": Post.FORMAT_URLS["POST"].format(self.post_id),
-                        "visitorData": self.visitor_data
+                        "visitorData": self.visitor_data,
                     }
                 },
                 "continuation": self.comments_continuation_token,
-                "clickTracking": {
-                    "clickTrackingParams": self.click_tracking_params
-                }
+                "clickTracking": {"clickTrackingParams": self.click_tracking_params},
             }
 
-            r = requests_cache.post(
-                Post.FORMAT_URLS["BROWSE_ENDPOINT"],
-                json=json_body,
-                expire_after=expire_after,
-                headers=headers
-            )
+            r = requests_cache.post(Post.FORMAT_URLS["BROWSE_ENDPOINT"], json=json_body, expire_after=expire_after, headers=headers)
 
             data = r.json()
             if self.first:
@@ -222,10 +208,10 @@ class Post(object):
                             0,
                             "continuationItemRenderer",
                             "continuationEndpoint",
-                            "clickTrackingParams"
+                            "clickTrackingParams",
                         ),
                         self.visitor_data,
-                        self.session_index
+                        self.session_index,
                     )
                 )
             elif kind == "continuationItemRenderer":
@@ -257,15 +243,15 @@ class Post(object):
 
         post = Post(
             data["postId"],
-            author = {
+            author={
                 "authorText": safely_get_value_from_key(data, "authorText"),
                 "authorThumbnail": safely_get_value_from_key(data, "authorThumbnail"),
-                "authorEndpoint": safely_get_value_from_key(data, "authorEndpoint")
+                "authorEndpoint": safely_get_value_from_key(data, "authorEndpoint"),
             },
-            content_text = clean_content_text(safely_get_value_from_key(data, "contentText")),
-            backstage_attachment = clean_backstage_attachement(safely_get_value_from_key(data, "backstageAttachment", default=None)),
-            vote_count = safely_get_value_from_key(data, "voteCount"),
-            sponsor_only_badge = safely_get_value_from_key(data, "sponsorsOnlyBadge", default=None)
+            content_text=clean_content_text(safely_get_value_from_key(data, "contentText")),
+            backstage_attachment=clean_backstage_attachement(safely_get_value_from_key(data, "backstageAttachment", default=None)),
+            vote_count=safely_get_value_from_key(data, "voteCount"),
+            sponsor_only_badge=safely_get_value_from_key(data, "sponsorsOnlyBadge", default=None),
         )
 
         post.raw_data = data
