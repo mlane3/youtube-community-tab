@@ -25,7 +25,7 @@ def clean_content_text(content):
                 item.pop("navigationEndpoint")
     return content
 
-def clean_backstage_attachement(attachment):
+def clean_backstage_attachment(attachment):
     if attachment:
         if "pollRenderer" in attachment:
             for choice in attachment["pollRenderer"]["choices"]:

@@ -2,7 +2,7 @@ import json
 import re
 from requests.utils import dict_from_cookiejar
 
-from .helpers.clean_items import clean_content_text, clean_backstage_attachement
+from .helpers.clean_items import clean_content_text, clean_backstage_attachment
 from .helpers.utils import safely_get_value_from_key, get_auth_header, CLIENT_VERSION
 from .requests_handler import requests_cache
 from .comment import Comment
@@ -19,13 +19,15 @@ class Post(object):
         "YT_INITIAL_DATA": "ytInitialData = ({(?:(?:.|\n)*)?});</script>",
     }
 
-    def __init__(self, post_id, author=None, content_text=None, backstage_attachment=None, vote_count=None, sponsor_only_badge=None):
+    def __init__(self, post_id, author=None, content_text=None, backstage_attachment=None, vote_count=None, sponsor_only_badge=None, published_time_text = None):
+
         self.post_id = post_id
         self.author = author
         self.content_text = content_text
         self.backstage_attachment = backstage_attachment
         self.vote_count = vote_count
         self.sponsor_only_badge = sponsor_only_badge
+        self.published_time_text = published_time_text
 
         self.first = True
         self.comments = []
@@ -43,6 +45,9 @@ class Post(object):
             "vote_count": self.vote_count,
             "sponsor_only_badge": self.sponsor_only_badge,
         }
+    
+    def get_published_string(self):
+        return self.published_time_text
 
     @staticmethod
     def from_post_id(post_id, expire_after=0):
@@ -241,6 +246,7 @@ class Post(object):
         for value in ["clickTrackingParams", "commandMetadata", "browseEndpoint"]:
             data["authorEndpoint"].pop(value)
 
+        print(json.dumps(data, indent=4))
         post = Post(
             data["postId"],
             author={
@@ -252,6 +258,8 @@ class Post(object):
             backstage_attachment=clean_backstage_attachement(safely_get_value_from_key(data, "backstageAttachment", default=None)),
             vote_count=safely_get_value_from_key(data, "voteCount"),
             sponsor_only_badge=safely_get_value_from_key(data, "sponsorsOnlyBadge", default=None),
+            published_time_text = safely_get_value_from_key(data, "publishedTimeText", "runs", 0, "text", default=None),
+
         )
 
         post.raw_data = data
