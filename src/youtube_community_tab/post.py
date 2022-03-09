@@ -246,7 +246,6 @@ class Post(object):
         for value in ["clickTrackingParams", "commandMetadata", "browseEndpoint"]:
             data["authorEndpoint"].pop(value)
 
-        print(json.dumps(data, indent=4))
         post = Post(
             data["postId"],
             author={
@@ -255,7 +254,7 @@ class Post(object):
                 "authorEndpoint": safely_get_value_from_key(data, "authorEndpoint"),
             },
             content_text=clean_content_text(safely_get_value_from_key(data, "contentText")),
-            backstage_attachment=clean_backstage_attachement(safely_get_value_from_key(data, "backstageAttachment", default=None)),
+            backstage_attachment=clean_backstage_attachment(safely_get_value_from_key(data, "backstageAttachment", default=None)),
             vote_count=safely_get_value_from_key(data, "voteCount"),
             sponsor_only_badge=safely_get_value_from_key(data, "sponsorsOnlyBadge", default=None),
             published_time_text = safely_get_value_from_key(data, "publishedTimeText", "runs", 0, "text", default=None),

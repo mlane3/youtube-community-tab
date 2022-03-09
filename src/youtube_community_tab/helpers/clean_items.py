@@ -66,5 +66,10 @@ def clean_backstage_attachment(attachment):
                 "thumbnailOverlays",
             ]:
                 safe_pop(attachment, "videoRenderer", value)
+        elif "backstageImageRenderer" in attachment:
+            safe_pop(attachment, "backstageImageRenderer", "trackingParams")
+        elif "postMultiImageRenderer" in attachment:
+            for image in attachment["postMultiImageRenderer"]["images"]:
+                safe_pop(image, "backstageImageRenderer", "trackingParams")
         return attachment
     return None
