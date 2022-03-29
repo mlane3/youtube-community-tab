@@ -1,9 +1,10 @@
 import json
 import re
 from requests.utils import dict_from_cookiejar
+from base64 import urlsafe_b64encode
 
-from .helpers.clean_items import clean_content_text, clean_backstage_attachment
-from .helpers.utils import safely_get_value_from_key, get_auth_header, CLIENT_VERSION
+from .helpers.clean_items import clean_content_text, clean_backstage_attachement
+from .helpers.utils import safely_get_value_from_key, search_key, get_auth_header, CLIENT_VERSION
 from .requests_handler import requests_cache
 from .comment import Comment
 
@@ -13,15 +14,16 @@ class Post(object):
         "POST": "https://www.youtube.com/post/{}",
         # HARD_CODED: This key seems to be constant to everyone, IDK
         "BROWSE_ENDPOINT": "https://www.youtube.com/youtubei/v1/browse?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+        "CREATE_COMMENT_ENDPOINT": "https://www.youtube.com/youtubei/v1/comment/create_comment?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false"
     }
 
     REGEX = {
-        "YT_INITIAL_DATA": "ytInitialData = ({(?:(?:.|\n)*)?});</script>",
+        "YT_INITIAL_DATA": "ytInitialData = ({(?:(?:.|\n)*)?});</script>"
     }
 
     def __init__(self, post_id, author=None, content_text=None, backstage_attachment=None, vote_count=None, sponsor_only_badge=None, published_time_text = None):
-
         self.post_id = post_id
+        self.channel_id = channel_id
         self.author = author
         self.content_text = content_text
         self.backstage_attachment = backstage_attachment
@@ -39,11 +41,12 @@ class Post(object):
     def as_json(self):
         return {
             "post_id": self.post_id,
+            "channel_id": self.channel_id,
             "author": self.author,
             "content_text": self.content_text,
             "backstage_attachment": self.backstage_attachment,
             "vote_count": self.vote_count,
-            "sponsor_only_badge": self.sponsor_only_badge,
+            "sponsor_only_badge": self.sponsor_only_badge
         }
     
     def get_published_string(self):
@@ -68,6 +71,7 @@ class Post(object):
         community_tab_items = Post.get_items_from_community_tab(community_tab)
 
         post_data = community_tab_items[0]["backstagePostThreadRenderer"]["post"]["backstagePostRenderer"]
+        post_data["channelId"] = data["metadata"]["channelMetadataRenderer"]["externalId"]
 
         post = Post.from_data(post_data)
         post.get_first_continuation_token(data)
@@ -149,7 +153,7 @@ class Post(object):
                     "X-Goog-AuthUser": self.session_index,
                     "X-Origin": "https://www.youtube.com",
                     "X-Youtube-Client-Name": "1",
-                    "X-Youtube-Client-Version": CLIENT_VERSION,
+                    "X-Youtube-Client-Version": CLIENT_VERSION
                 }
             )
 
@@ -159,11 +163,11 @@ class Post(object):
                         "clientName": "WEB",
                         "clientVersion": CLIENT_VERSION,
                         "originalUrl": Post.FORMAT_URLS["POST"].format(self.post_id),
-                        "visitorData": self.visitor_data,
+                        "visitorData": self.visitor_data
                     }
                 },
                 "continuation": self.comments_continuation_token,
-                "clickTracking": {"clickTrackingParams": self.click_tracking_params},
+                "clickTracking": {"clickTrackingParams": self.click_tracking_params}
             }
 
             r = requests_cache.post(Post.FORMAT_URLS["BROWSE_ENDPOINT"], json=json_body, expire_after=expire_after, headers=headers)
@@ -194,6 +198,7 @@ class Post(object):
                     Comment.from_data(
                         item[kind]["comment"]["commentRenderer"],
                         self.post_id,
+                        self.channel_id,
                         safely_get_value_from_key(
                             item[kind],
                             "replies",
@@ -213,10 +218,10 @@ class Post(object):
                             0,
                             "continuationItemRenderer",
                             "continuationEndpoint",
-                            "clickTrackingParams",
+                            "clickTrackingParams"
                         ),
                         self.visitor_data,
-                        self.session_index,
+                        self.session_index
                     )
                 )
             elif kind == "continuationItemRenderer":
@@ -233,6 +238,57 @@ class Post(object):
             return "\n".join([run["text"] for run in runs])
         return None
 
+    def get_create_comment_params(self):
+        if self.channel_id is None or self.post_id is None:
+            return None
+
+        params = [
+            b"*\x02\b\x00P\x01\xA2\x01",
+            len(self.post_id).to_bytes(1, "big"),
+            self.post_id.encode(),
+            b"\xAA\x01",
+            len(self.channel_id).to_bytes(1, "big"),
+            self.channel_id.encode(),
+        ]
+
+        params = urlsafe_b64encode(b"".join(params)).decode().replace("=", "%3D")
+
+        return params
+
+    def create_comment(self, comment_text):
+        headers = {
+            "x-origin": "https://www.youtube.com"
+        }
+
+        current_cookies = dict_from_cookiejar(requests_cache.cookies)
+        if "SAPISID" in current_cookies:
+            headers["Authorization"] = get_auth_header(current_cookies["SAPISID"])
+
+        json_body = {
+            "context": {
+                "client": {
+                    "clientName": "WEB",
+                    "clientVersion": CLIENT_VERSION,
+                },
+            },
+            "createCommentParams": self.get_create_comment_params(),
+            "commentText": comment_text
+        }
+
+        r = requests_cache.post(
+            Post.FORMAT_URLS["CREATE_COMMENT_ENDPOINT"],
+            json=json_body,
+            headers=headers
+        )
+
+        try:
+            data = r.json()
+            comment_id = search_key("comment", data)[0][1]["commentRenderer"]["commentId"]
+
+            return Comment.from_ids(comment_id, self.post_id, self.channel_id)
+        except Exception as e:
+            raise e
+
     @staticmethod
     def from_data(data):
         # clean the author cause it's different here for some reason
@@ -248,17 +304,17 @@ class Post(object):
 
         post = Post(
             data["postId"],
+            channel_id=data["channelId"],
             author={
                 "authorText": safely_get_value_from_key(data, "authorText"),
                 "authorThumbnail": safely_get_value_from_key(data, "authorThumbnail"),
-                "authorEndpoint": safely_get_value_from_key(data, "authorEndpoint"),
+                "authorEndpoint": safely_get_value_from_key(data, "authorEndpoint")
             },
             content_text=clean_content_text(safely_get_value_from_key(data, "contentText")),
             backstage_attachment=clean_backstage_attachment(safely_get_value_from_key(data, "backstageAttachment", default=None)),
             vote_count=safely_get_value_from_key(data, "voteCount"),
             sponsor_only_badge=safely_get_value_from_key(data, "sponsorsOnlyBadge", default=None),
-            published_time_text = safely_get_value_from_key(data, "publishedTimeText", "runs", 0, "text", default=None),
-
+            published_time_text = safely_get_value_from_key(data, "publishedTimeText", "runs", 0, "text", default=None)
         )
 
         post.raw_data = data

@@ -34,9 +34,9 @@ class Reply(object):
                 "authorThumbnail": safely_get_value_from_key(data, "authorThumbnail"),
                 "authorEndpoint": safely_get_value_from_key(data, "authorEndpoint", "browseEndpoint"),
                 "authorIsChannelOwner": safely_get_value_from_key(data, "authorIsChannelOwner"),
-                "sponsorCommentBadge": safely_get_value_from_key(data, "sponsorCommentBadge"),
+                "sponsorCommentBadge": safely_get_value_from_key(data, "sponsorCommentBadge")
             },
-            vote_count=safely_get_value_from_key(data, "voteCount"),
+            vote_count=safely_get_value_from_key(data, "voteCount")
         )
 
         reply.raw_data = data

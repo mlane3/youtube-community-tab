@@ -35,7 +35,7 @@ def clean_backstage_attachment(attachment):
                     "voteRatioIfSelected",
                     "votePercentageIfSelected",
                     "voteRatioIfNotSelected",
-                    "votePercentageIfNotSelected",
+                    "votePercentageIfNotSelected"
                 ]:
                     safe_pop(choice, value)
         elif "videoRenderer" in attachment:
@@ -63,7 +63,7 @@ def clean_backstage_attachment(attachment):
                 "showActionMenu",
                 "menu",
                 "channelThumbnailSupportedRenderers",
-                "thumbnailOverlays",
+                "thumbnailOverlays"
             ]:
                 safe_pop(attachment, "videoRenderer", value)
         elif "backstageImageRenderer" in attachment:

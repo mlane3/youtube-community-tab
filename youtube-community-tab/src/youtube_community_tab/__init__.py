@@ -1,5 +1,5 @@
 from . import (
-    helpers,
+    helpers
 )
 
 from .comment import Comment
@@ -14,5 +14,5 @@ __all__ = [
     "CommunityTab",
     "Post",
     "Reply",
-    "requests_cache",
+    "requests_cache"
 ]
