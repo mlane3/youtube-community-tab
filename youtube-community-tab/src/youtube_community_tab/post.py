@@ -3,7 +3,7 @@ import re
 from requests.utils import dict_from_cookiejar
 from base64 import urlsafe_b64encode
 
-from .helpers.clean_items import clean_content_text, clean_backstage_attachement
+from .helpers.clean_items import clean_content_text, clean_backstage_attachment
 from .helpers.utils import safely_get_value_from_key, search_key, get_auth_header, CLIENT_VERSION
 from .requests_handler import requests_cache
 from .comment import Comment
@@ -21,7 +21,7 @@ class Post(object):
         "YT_INITIAL_DATA": "ytInitialData = ({(?:(?:.|\n)*)?});</script>"
     }
 
-    def __init__(self, post_id, author=None, content_text=None, backstage_attachment=None, vote_count=None, sponsor_only_badge=None, published_time_text = None):
+    def __init__(self, post_id, channel_id, author=None, content_text=None, backstage_attachment=None, vote_count=None, sponsor_only_badge=None, published_time_text = None):
         self.post_id = post_id
         self.channel_id = channel_id
         self.author = author
