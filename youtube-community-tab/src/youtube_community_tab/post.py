@@ -54,7 +54,10 @@ class Post(object):
 
     @staticmethod
     def from_post_id(post_id, expire_after=0):
-        headers = {"Referer": Post.FORMAT_URLS["POST"].format(post_id)}
+        headers = {
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": Post.FORMAT_URLS["POST"].format(post_id)
+        }
 
         # Add authorization header
         current_cookies = dict_from_cookiejar(requests_cache.cookies)
@@ -125,7 +128,10 @@ class Post(object):
         ]["itemSectionRenderer"]["contents"][0]["continuationItemRenderer"]["continuationEndpoint"]["clickTrackingParams"]
 
     def load_comments(self, expire_after=0):
-        headers = {"Referer": Post.FORMAT_URLS["POST"].format(self.post_id)}
+        headers = {
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": Post.FORMAT_URLS["POST"].format(self.post_id)
+        }
 
         # Add authorization header
         current_cookies = dict_from_cookiejar(requests_cache.cookies)
@@ -257,6 +263,7 @@ class Post(object):
 
     def create_comment(self, comment_text):
         headers = {
+            "Accept-Language": "en-US,en;q=0.9",
             "x-origin": "https://www.youtube.com"
         }
 

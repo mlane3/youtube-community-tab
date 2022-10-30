@@ -65,6 +65,7 @@ class Comment(object):
 
     def load_replies(self, expire_after=0):
         headers = {
+            "Accept-Language": "en-US,en;q=0.9",
             "x-origin": "https://www.youtube.com",
             "Referer": Comment.FORMAT_URLS["POST"].format(self.post_id)
         }
@@ -198,6 +199,7 @@ class Comment(object):
     def from_ids(comment_id, post_id, channel_id, expire_after=0):
         fixed_comment_url = Comment.FORMAT_URLS["FIXED_COMMENT"].format(channel_id, comment_id, post_id)
         headers = {
+            "Accept-Language": "en-US,en;q=0.9",
             "x-origin": "https://www.youtube.com",
             "Referer": fixed_comment_url
         }
@@ -283,6 +285,7 @@ class Comment(object):
             update_comment_params = Comment.get_update_comment_params(comment_id, post_id, channel_id)
 
         headers = {
+            "Accept-Language": "en-US,en;q=0.9",
             "x-origin": "https://www.youtube.com"
         }
 
@@ -403,6 +406,7 @@ class Comment(object):
     @staticmethod
     def perform_action(action_params):
         headers = {
+            "Accept-Language": "en-US,en;q=0.9",
             "x-origin": "https://www.youtube.com"
         }
 

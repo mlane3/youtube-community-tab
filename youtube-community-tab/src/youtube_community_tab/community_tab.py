@@ -31,6 +31,7 @@ class CommunityTab(object):
 
     def load_posts(self, expire_after=0):
         headers = {
+            "Accept-Language": "en-US,en;q=0.9",
             "Referer": self.community_url
         }
 
