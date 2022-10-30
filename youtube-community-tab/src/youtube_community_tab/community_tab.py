@@ -136,12 +136,10 @@ class CommunityTab(object):
 
     @staticmethod
     def get_community_tab(tabs):
-        COMMUNITY_TAB_INDEX = 3
-
-        if len(tabs) >= COMMUNITY_TAB_INDEX + 1:
-            return tabs[COMMUNITY_TAB_INDEX]
-        else:
-            raise Exception(f"[The community tab is expected to have index equal to {COMMUNITY_TAB_INDEX}, but len(tabs) = {len(tabs)}]")
+        for tab in tabs:
+            if tab["tabRenderer"]["title"] == "Community":
+                return tab
+        raise Exception(f"[Could not find a Community tab in the channel response]")
 
     @staticmethod
     def get_items_from_community_tab(tab):
