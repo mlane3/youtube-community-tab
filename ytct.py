@@ -12,8 +12,9 @@ from youtube_community_tab.requests_handler import requests_cache
 from youtube_community_tab.post import Post
 from youtube_community_tab.community_tab import CommunityTab
 
-POST_REGEX=r"^(?:(?:https?:\/\/)?(?:.*?\.)?(?:youtube\.com\/)((?:channel\/UC[a-zA-Z0-9_-]{1,}\/community\?lb=)|post\/))?(?P<post_id>Ug[a-zA-Z0-9_-]{1,})(.*)?$"
-CHANNEL_REGEX=r"^(?:(?:https?:\/\/)?(?:.*?\.)?(?:youtube\.com\/channel\/))?(?P<channel_id>UC[a-zA-Z0-9_-]{1,})(?:\/.*)?$"
+POST_REGEX=r"^(?:(?:https?:\/\/)?(?:.*?\.)?(?:youtube\.com\/)((?:channel\/UC[a-zA-Z0-9_-]+\/community\?lb=)|post\/))?(?P<post_id>Ug[a-zA-Z0-9_-]+)(.*)?$"
+CHANNEL_REGEX=r"^(?:(?:https?:\/\/)?(?:.*?\.)?(?:youtube\.com\/))((?P<channel_handle>@[a-zA-Z0-9_-]+)|((channel\/)?(?P<channel_id>UC[a-zA-Z0-9_-]+)))(?:\/.*)?$"
+HANDLE_TO_ID_REGEX=r"\"header\":\{\"c4TabbedHeaderRenderer\":\{\"channelId\":\"(?P<channel_id>UC[a-zA-Z0-9_-]+)\""
 POST_DATE_REGEX=r"^(?P<magnitude>[0-9]{1,2}) (?P<unit>(second|minute|hour|day|week|month|year))s? ago(?P<edited> \(edited\))?$"
 CLEAN_FILENAME_KINDA=r"[^\w\-_\. \[\]\(\)]"
 BLOCK_SIZE = 1024
@@ -46,6 +47,20 @@ def use_cookies(cookie_jar_path):
         print_log("ytct", f"failed to load cookies from {cookie_jar_path}, continuing without cookies")
         return
     requests_cache.cookies = cookie_jar
+
+def get_channel_id_from_handle(channel_handle):
+    handle_url = f"https://youtube.com/{channel_handle}"
+    channel_home_r = requests.get(handle_url)
+    if not channel_home_r.ok:
+        print_log("ytct", f"failed to convert channel handle to channel id, no response from {handle_url}")
+        sys.exit(1)
+    channel_home = channel_home_r.text
+    channel_id_m = re.search(HANDLE_TO_ID_REGEX, channel_home)
+    channel_id = channel_id_m.group("channel_id")
+    if not channel_id:
+        print_log("ytct", f"failed to convert channel handle to channel id, data format may have changed")
+        sys.exit(1)
+    return channel_id
 
 def get_post(post_id, post_archive):
     if post_archive:
@@ -253,7 +268,11 @@ if __name__ == "__main__":
             post_id = post_id_m.group("post_id")
             get_post(post_id, usable_archive)
         elif channel_id_m:
-            channel_id = channel_id_m.group("channel_id")
+            channel_handle = channel_id_m.group("channel_handle")
+            if channel_handle:
+                channel_id = get_channel_id_from_handle(channel_handle)
+            else:
+                channel_id = channel_id_m.group("channel_id")
             get_channel_posts(channel_id, usable_archive)
         else:
             print_log("ytct", f"could not parse link/id {link}")
