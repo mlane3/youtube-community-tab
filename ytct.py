@@ -50,7 +50,7 @@ def use_cookies(cookie_jar_path):
 
 def get_channel_id_from_handle(channel_handle):
     handle_url = f"https://youtube.com/{channel_handle}"
-    channel_home_r = requests.get(handle_url)
+    channel_home_r = requests_cache.get(handle_url)
     if not channel_home_r.ok:
         print_log("ytct", f"failed to convert channel handle to channel id, no response from {handle_url}")
         sys.exit(1)
