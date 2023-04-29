@@ -15,7 +15,8 @@ class CommunityTab(object):
     }
 
     REGEX = {
-        "YT_INITIAL_DATA": "ytInitialData = ({(?:(?:.|\n)*)?});</script>"
+        "YT_INITIAL_DATA": "ytInitialData = ({(?:(?:.|\n)*)?});</script>",
+        "COMMUNITY_TAB_URL": "^\/.*\/community$"
     }
 
     def __init__(self, channel_name):
@@ -138,7 +139,7 @@ class CommunityTab(object):
     @staticmethod
     def get_community_tab(tabs):
         for tab in tabs:
-            if tab["tabRenderer"]["title"] == "Community":
+            if "tabRenderer" in tab and re.match(CommunityTab.REGEX["COMMUNITY_TAB_URL"], tab["tabRenderer"]["endpoint"]["commandMetadata"]["webCommandMetadata"]["url"]):
                 return tab
         raise Exception(f"[Could not find a Community tab in the channel response]")
 
