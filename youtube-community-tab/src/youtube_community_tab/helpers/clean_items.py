@@ -12,9 +12,10 @@ def clean_content_text(content):
                 url = item["navigationEndpoint"]["urlEndpoint"]["url"]
                 # replace redirects with direct links
                 if url.startswith("https://www.youtube.com/redirect"):
-                    parsed_url = urlparse(item["navigationEndpoint"]["urlEndpoint"]["url"])
+                    parsed_url = urlparse(url)
                     redirect_url = parse_qs(parsed_url.query)["q"][0]
-                    item["urlEndpoint"] = {"url": unquote(redirect_url)}
+                    url = unquote(redirect_url)
+                item["urlEndpoint"] = {"url": url}
                 item.pop("navigationEndpoint")
             # hashtags
             elif "browseEndpoint" in item["navigationEndpoint"]:
