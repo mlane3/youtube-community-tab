@@ -38,15 +38,31 @@ def get_arguments():
     parser.add_argument("links", metavar="CHANNEL", nargs="*", help="youtube channel or community post link/id")
     return parser.parse_args()
 
+def use_default_cookies():
+    requests_cache.cookies.set(
+        'SOCS',
+        'CAESNQgDEitib3FfaWRlbnRpdHlmcm9udGVuZHVpc2VydmVyXzIwMjIwNzA1LjE2X3AwGgJwdCACGgYIgOedlgY',
+        domain='.youtube.com',
+        path='/'
+    )
+    requests_cache.cookies.set(
+        'CONSENT',
+        'PENDING+917',
+        domain='.youtube.com',
+        path='/'
+    )
+
 def use_cookies(cookie_jar_path):
     cookie_jar = cookiejar.MozillaCookieJar(cookie_jar_path)
     try:
         cookie_jar.load()
         print_log("ytct", f"loaded cookies from {cookie_jar_path}")
     except FileNotFoundError:
+        use_default_cookies()
         print_log("ytct", f"could not find cookies file {cookie_jar_path}, continuing without cookies...")
         return
     except (cookiejar.LoadError, OSError) as e:
+        use_default_cookies()
         print_log("ytct", f"{e}")
         print_log("ytct", f"failed to load cookies from {cookie_jar_path}, continuing without cookies")
         return
@@ -249,6 +265,8 @@ if __name__ == "__main__":
     # set cookies for retrieving posts that need auth
     if args.cookies:
         use_cookies(args.cookies)
+    else:
+        use_default_cookies()
     usable_archive = None
     if args.post_archive:
         try:
