@@ -43,7 +43,11 @@ def use_cookies(cookie_jar_path):
     try:
         cookie_jar.load()
         print_log("ytct", f"loaded cookies from {cookie_jar_path}")
-    except:
+    except FileNotFoundError:
+        print_log("ytct", f"could not find cookies file {cookie_jar_path}, continuing without cookies...")
+        return
+    except (cookiejar.LoadError, OSError) as e:
+        print_log("ytct", f"{e}")
         print_log("ytct", f"failed to load cookies from {cookie_jar_path}, continuing without cookies")
         return
     requests_cache.cookies = cookie_jar
@@ -244,10 +248,7 @@ if __name__ == "__main__":
     args = get_arguments()
     # set cookies for retrieving posts that need auth
     if args.cookies:
-        if os.path.isfile(args.cookies):
-            use_cookies(args.cookies)
-        else:
-            print_log("ytct", f"could not find cookies file \'{args.cookies}\', continuing without cookies...")
+        use_cookies(args.cookies)
     usable_archive = None
     if args.post_archive:
         try:
