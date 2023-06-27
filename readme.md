@@ -25,12 +25,7 @@ OR
 --cookies COOKIES FILE        a Netscape format cookies file, allows the script to
                               retrieve Membership-only posts
 -d, --directory DIRECTORY     save directory (defaults to current)
---write-viewer                copy the viewer file and create an index of downloaded
-                              posts to be viewed (not yet complete)
 --post-archive FILE           download only posts not listed in the archive file
                               and record the IDs of newly downloaded posts
---dates                       write as much information about the publishing date as
-                              possible, as well as attempting to update dates for
-                              prior posts based on new information (this feature is experimental and may not work                                 as intended)
-
+--dates                       write information about the post publish date
 ```

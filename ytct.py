@@ -15,7 +15,7 @@ from youtube_community_tab.community_tab import CommunityTab
 POST_REGEX=r"^(?:(?:https?:\/\/)?(?:.*?\.)?(?:youtube\.com\/)((?:channel\/UC[a-zA-Z0-9_-]+\/community\?lb=)|post\/))?(?P<post_id>Ug[a-zA-Z0-9_-]+)(.*)?$"
 CHANNEL_REGEX=r"^(?:(?:https?:\/\/)?(?:.*?\.)?(?:youtube\.com\/))((?P<channel_handle>@[a-zA-Z0-9_-]+)|((channel\/)?(?P<channel_id>UC[a-zA-Z0-9_-]+)))(?:\/.*)?$"
 HANDLE_TO_ID_REGEX=r"\"header\":\{\"c4TabbedHeaderRenderer\":\{\"channelId\":\"(?P<channel_id>UC[a-zA-Z0-9_-]+)\""
-POST_DATE_REGEX=r"^(?P<magnitude>[0-9]{1,2}) (?P<unit>(second|minute|hour|day|week|month|year))s? ago(?P<edited> \(edited\))?$"
+POST_DATE_REGEX=r"(?P<magnitude>[0-9]{1,2}) (?P<unit>(second|minute|hour|day|week|month|year))s? ago(?P<edited> \(edited\))?$"
 CLEAN_FILENAME_KINDA=r"[^\w\-_\. \[\]\(\)]"
 BLOCK_SIZE = 1024
 TIME_FACTORS={
@@ -32,9 +32,8 @@ args = None
 def get_arguments():
     parser.add_argument("--cookies", metavar="COOKIES FILE", type=str, help="path to a Netscape format cookies file where cookies will be read from/written to")
     parser.add_argument("-d", "--directory", type=str, help="save directory (defaults to current)", default=os.getcwd())
-    parser.add_argument("--write-viewer", action="store_true", help="copy the viewer file and create an index of downloaded posts to be viewed")
     parser.add_argument("--post-archive", metavar="FILE", type=str, help="download only posts not listed in the archive file and record the IDs of newly downloaded posts")
-    parser.add_argument("--dates", action="store_true", help="write as much information about the publishing date as possible, as well as attempting to update dates for prior posts based on new information")
+    parser.add_argument("--dates", action="store_true", help="write information about the post publish date")
     parser.add_argument("links", metavar="CHANNEL", nargs="*", help="youtube channel or community post link/id")
     return parser.parse_args()
 
@@ -152,35 +151,36 @@ def handle_post_timestamp(post, path):
     timestamp_obj["lastUpdatedTimestamp"] = int(datetime.utcnow().timestamp())
     # string as it appears on YouTube
     timestamp_obj["lastPublishedString"] = post.get_published_string()
+    # code removed for the time being to prevent trashing files of inexperienced users
     # the closest UTC timestamp, and the seconds difference from the furthest UTC timestamp
-    diff_to_nearest_possible_date, timestamp_obj["timestampAccuracy"], timestamp_obj["is_edited"] = get_time_diff_from_text(timestamp_obj["lastPublishedString"])
-    if diff_to_nearest_possible_date and timestamp_obj["timestampAccuracy"]:
-        timestamp_obj["closestTimestamp"] = timestamp_obj["lastUpdatedTimestamp"] - diff_to_nearest_possible_date
-        if os.path.isfile(f"{path}.json"):
-            try:
-                with open(f"{path}.json", "r") as previous_post_file:
-                    previous_post_j = json.load(previous_post_file)
-                if "_published" in previous_post_j:
-                    previous_timestamp_obj = previous_post_j["_published"]
-                    diff_since_last_update = timestamp_obj["lastUpdatedTimestamp"] - previous_timestamp_obj["lastUpdatedTimestamp"]
-                    if previous_timestamp_obj["lastPublishedString"] == timestamp_obj["lastPublishedString"]:
-                        # update accuracy based on time between current and last update
-                        timestamp_obj["timestampAccuracy"] = previous_timestamp_obj["timestampAccuracy"] - diff_since_last_update
-                    elif diff_since_last_update < previous_timestamp_obj["timestampAccuracy"]:
-                        # time between change in update is less than previous accuracy, should be safe to change
-                        # i.e. if you save a post 3 days after publish, accuracy is 72-96 hours
-                        # if you then update 364 days after publish, and update again 1 year after publish
-                        # the diff since last update is 24 hours, which is better than before
-                        timestamp_obj["timestampAccuracy"] = diff_since_last_update
-                    else:
-                        # keep previous accuracy
-                        timestamp_obj["timestampAccuracy"] = previous_timestamp_obj["timestampAccuracy"]
-                    if previous_timestamp_obj["closestTimestamp"] < timestamp_obj["closestTimestamp"]:
-                        # if closest timestamp is not better than previous, keep previous
-                        timestamp_obj["closestTimestamp"] = previous_timestamp_obj["closestTimestamp"]
-            except Exception as e:
-                print_log("community post", f"failed to open previously downloaded post {post.post_id}")
-                print_log("community post", str(e))
+    # diff_to_nearest_possible_date, timestamp_obj["timestampAccuracy"], timestamp_obj["is_edited"] = get_time_diff_from_text(timestamp_obj["lastPublishedString"])
+    # if diff_to_nearest_possible_date and timestamp_obj["timestampAccuracy"]:
+    #     timestamp_obj["closestTimestamp"] = timestamp_obj["lastUpdatedTimestamp"] - diff_to_nearest_possible_date
+    #     if os.path.isfile(f"{path}.json"):
+    #         try:
+    #             with open(f"{path}.json", "r") as previous_post_file:
+    #                 previous_post_j = json.load(previous_post_file)
+    #             if "_published" in previous_post_j:
+    #                 previous_timestamp_obj = previous_post_j["_published"]
+    #                 diff_since_last_update = timestamp_obj["lastUpdatedTimestamp"] - previous_timestamp_obj["lastUpdatedTimestamp"]
+    #                 if previous_timestamp_obj["lastPublishedString"] == timestamp_obj["lastPublishedString"]:
+    #                     # update accuracy based on time between current and last update
+    #                     timestamp_obj["timestampAccuracy"] = previous_timestamp_obj["timestampAccuracy"] - diff_since_last_update
+    #                 elif diff_since_last_update < previous_timestamp_obj["timestampAccuracy"]:
+    #                     # time between change in update is less than previous accuracy, should be safe to change
+    #                     # i.e. if you save a post 3 days after publish, accuracy is 72-96 hours
+    #                     # if you then update 364 days after publish, and update again 1 year after publish
+    #                     # the diff since last update is 24 hours, which is better than before
+    #                     timestamp_obj["timestampAccuracy"] = diff_since_last_update
+    #                 else:
+    #                     # keep previous accuracy
+    #                     timestamp_obj["timestampAccuracy"] = previous_timestamp_obj["timestampAccuracy"]
+    #                 if previous_timestamp_obj["closestTimestamp"] < timestamp_obj["closestTimestamp"]:
+    #                     # if closest timestamp is not better than previous, keep previous
+    #                     timestamp_obj["closestTimestamp"] = previous_timestamp_obj["closestTimestamp"]
+    #         except Exception as e:
+    #             print_log("community post", f"failed to open previously downloaded post {post.post_id}")
+    #             print_log("community post", str(e))
     return timestamp_obj
 
 def get_time_diff_from_text(published_text):
