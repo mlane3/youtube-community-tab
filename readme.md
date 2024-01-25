@@ -1,13 +1,21 @@
-# YouTube Community Tab
 
-This repo includes a fork of [bot-jonas/youtube-community-tab](https://github.com/bot-jonas/youtube-community-tab), as well as a script to scrape and dump community tab posts as .json files, along with all attached images and thumbnails.
+# Extreme Vtuber YouTube Community Tab Downloader
+
+This repo is a fork of several repos especially a [bot-jonas/youtube-community-tab](https://github.com/bot-jonas/youtube-community-tab).  Those Source repos are listed below.
+First the script a script to scrape and dump community tab posts as .json files, along with all attached images and thumbnails.
+
+## Reference Repos
+[bot-jonas/youtube-community-tab](https://github.com/bot-jonas/youtube-community-tab)
+
 
 ## Setup / Update
 
 Since this version of the youtube-community-tab package is slightly modified, you will need to install/update it from this repo to guarantee compatibility.
+Then you cd your way back up.
 ```sh
 cd youtube-community-tab
 pip install .
+cd .. 
 ```
 
 ## Example Usage
