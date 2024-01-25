@@ -1,3 +1,2 @@
-2024/01/25-08:00:32.475 a610 Reusing MANIFEST D:\Github\youtube-community-tab\profiles\Profile 7\Session Storage/MANIFEST-000001
-2024/01/25-08:00:32.475 a610 Recovering log #5
-2024/01/25-08:00:32.477 a610 Reusing old log D:\Github\youtube-community-tab\profiles\Profile 7\Session Storage/000005.log 
+2024/01/25-10:38:42.972 8754 Creating DB D:\Github\youtube-community-tab\profiles\Profile 7\Session Storage__tmp_for_rebuild since it was missing.
+2024/01/25-10:38:43.763 8754 Reusing MANIFEST D:\Github\youtube-community-tab\profiles\Profile 7\Session Storage__tmp_for_rebuild/MANIFEST-000001

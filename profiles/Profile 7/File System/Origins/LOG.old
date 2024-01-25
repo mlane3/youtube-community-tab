@@ -1,3 +1,2 @@
-2024/01/25-07:30:51.083 8dd8 Reusing MANIFEST C:\Users\Michael\AppData\Local\Google\Chrome\User Data\Profile 7\File System\Origins/MANIFEST-000001
-2024/01/25-07:30:51.083 8dd8 Recovering log #3
-2024/01/25-07:30:51.083 8dd8 Reusing old log C:\Users\Michael\AppData\Local\Google\Chrome\User Data\Profile 7\File System\Origins/000003.log 
+2024/01/25-10:38:45.371 a160 Creating DB D:\Github\youtube-community-tab\profiles\Profile 7\File System\Origins__tmp_for_rebuild since it was missing.
+2024/01/25-10:38:45.491 a160 Reusing MANIFEST D:\Github\youtube-community-tab\profiles\Profile 7\File System\Origins__tmp_for_rebuild/MANIFEST-000001
