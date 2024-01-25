@@ -10,7 +10,7 @@
 # I need to write instructions so a normal human who doesn't work for in Taxes can install this
 # I need to convert a cookie jar to a simple dictionary or list.... so I can string import into the next package.
 
-# python ytct.py --cookies youtube-cookies.txt -d "./Yao" https://www.youtube.com/@ShioriNovella/community
+#  python ytct.py --cookies youtube-cookies.txt -d "./YozoraMel" https://www.youtube.com/@YozoraMel/community
 # ./ytct.py --cookies youtube-cookies.txt -d "./Ninomae Ina_nis Ch. hololive-EN" https://www.youtube.com/@NinomaeInanis/community
 
 #########
