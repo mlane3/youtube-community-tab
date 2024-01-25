@@ -50,7 +50,7 @@ def main():
   You may get an error about chrome driver being the wrong version.  Just change the number  below
   """
 
-  version = 127
+  version = 126
 
   """"
   Step 3 Get all community posts
@@ -158,9 +158,11 @@ def get_posts(fullpathlocationofprofile,profilename,myurl,smalllist):
     # hold the scroll key for 60 seconds
     driver.switch_to.window(driver.current_window_handle); hold_W('end', 60, 2, 1)
     driver.switch_to.window(driver.current_window_handle); pyautogui.hotkey('ctrl', 'shift', 'Y')
-    time.sleep(40)
+    time.sleep(50)
   driver.close()
   print("done")
+  
+# "End of File"  
 """
 # Failed code
 # this attempt to use the 
