@@ -1,2 +1,3 @@
-2024/01/25-10:38:42.972 514c Creating DB D:\Github\youtube-community-tab\profiles\Profile 7\Local Storage\leveldb__tmp_for_rebuild since it was missing.
-2024/01/25-10:38:43.764 514c Reusing MANIFEST D:\Github\youtube-community-tab\profiles\Profile 7\Local Storage\leveldb__tmp_for_rebuild/MANIFEST-000001
+2024/01/25-11:03:02.025 b254 Reusing MANIFEST D:\Github\youtube-community-tab\profiles\Profile 7\Local Storage\leveldb/MANIFEST-000001
+2024/01/25-11:03:02.026 b254 Recovering log #3
+2024/01/25-11:03:02.027 b254 Reusing old log D:\Github\youtube-community-tab\profiles\Profile 7\Local Storage\leveldb/000003.log 

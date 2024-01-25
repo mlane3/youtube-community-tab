@@ -24,6 +24,9 @@ cd ..
 python ytct.py --cookies cookies-youtube-com.txt -d "./Ninomae Ina_nis Ch. hololive-EN" https://www.youtube.com/channel/UCMwGHR0BTZuLsmjY_NT5Pwg/community
 OR
 ./ytct.py --cookies cookies-youtube-com.txt -d "./Ninomae Ina_nis Ch. hololive-EN" https://www.youtube.com/@NinomaeInanis/community
+
+python ytct.py --cookies youtube-cookies.txt -d "./YozoraMel" https://www.youtube.com/@YozoraMel/community
+
 ```
 
 ## Arguments

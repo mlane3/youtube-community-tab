@@ -50,7 +50,7 @@ def main():
   You may get an error about chrome driver being the wrong version.  Just change the number  below
   """
 
-  version = 126
+  version = 127
 
   """"
   Step 3 Get all community posts
@@ -73,7 +73,7 @@ def main():
   savefolder = './YozoraMel'
   youtubecommunitypage = 'https://www.youtube.com/@YozoraMel/community'
   yt_handle = '@YozoraMel'
-  smalllist = ['UgkxU64EHq6IHW8QFEyDFZdMTtcRc4NwZaed', 'Ugkx9nqwAp9R6jRDZ9kHILY3LymWvvGTPKQl']
+  #smalllist = ['UgkxU64EHq6IHW8QFEyDFZdMTtcRc4NwZaed', 'Ugkx9nqwAp9R6jRDZ9kHILY3LymWvvGTPKQl']
   myurl = youtubecommunitypage
 
   """
@@ -81,7 +81,7 @@ def main():
   # run this file.
   """
 
-  # smalllist = get_community(limit = 99999,savefolder)
+  smalllist = get_community(limit = 99999,savefolder = savefolder)
   get_posts(fullpathlocationofprofile,profilename,myurl,smalllist)
 
 #########
@@ -153,7 +153,8 @@ def get_posts(fullpathlocationofprofile,profilename,myurl,smalllist):
     driver.get(communitypost)
     time.sleep(3)
     driver.switch_to.window(driver.current_window_handle)
-    checkbox = driver.findelement(By.XPATH,'//*[@id="checkboxContainer"]')
+    checkbox = driver.find_element(By.XPATH,'//*[@id="checkboxContainer"]')
+    checkbox.click()
     # hold the scroll key for 60 seconds
     driver.switch_to.window(driver.current_window_handle); hold_W('end', 60, 2, 1)
     driver.switch_to.window(driver.current_window_handle); pyautogui.hotkey('ctrl', 'shift', 'Y')
